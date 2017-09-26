@@ -1,0 +1,8 @@
+- name: Restart Nginx
+  notify:
+    #- Confirm listening port open
+    #- Confirm cluster health green
+  service:
+    state: restarted
+    name: nginx
+    enabled: yes
