@@ -1,16 +1,9 @@
-provider "azurerm" {
-    subscription_id = "93de0f47-a80a-4cf8-aa98-df669708630e"
-    client_id       = "${var.client_id}"
-    client_secret   = "${var.client_secret}"
-    tenant_id       = "44bae6bd-54cc-424b-b017-969389e4db64"
-}
-
 #######################
 ### RESOURCE GROUPS ###
 #######################
 
-resource "azurerm_resource_group" "infra" {
-  name     = "${var.env_short_name}-infra-rg"
+resource "azurerm_resource_group" "infrastructure" {
+  name     = "${var.env_short_name}-infrastructure-rg"
   location = "${var.location_name}"
   tags {
     environment = "${var.env_name}"
@@ -31,7 +24,7 @@ resource "azurerm_resource_group" "web" {
 
 resource "azurerm_storage_account" "primary" {
   name                = "codecomplete${var.env_short_name}"
-  resource_group_name = "${azurerm_resource_group.infra.name}"
+  resource_group_name = "${azurerm_resource_group.infrastructure.name}"
   location            = "${var.location_name}"
   account_type        = "Standard_LRS"
   tags {
@@ -46,7 +39,7 @@ resource "azurerm_storage_account" "primary" {
 resource "azurerm_public_ip" "primary" {
   name                         = "${var.env_short_name}-ip"
   location                     = "${var.location_name}"
-  resource_group_name          = "${azurerm_resource_group.infra.name}"
+  resource_group_name          = "${azurerm_resource_group.infrastructure.name}"
   public_ip_address_allocation = "static"
   domain_name_label            = "code-complete-${var.env_short_name}"
 }
@@ -58,7 +51,7 @@ resource "azurerm_public_ip" "primary" {
 resource "azurerm_lb" "primary" {
   name                = "${var.env_short_name}-lb"
   location            = "${var.location_name}"
-  resource_group_name = "${azurerm_resource_group.infra.name}"
+  resource_group_name = "${azurerm_resource_group.infrastructure.name}"
   frontend_ip_configuration {
     name                 = "primary-ip-config"
     public_ip_address_id = "${azurerm_public_ip.primary.id}"
@@ -70,7 +63,7 @@ resource "azurerm_lb" "primary" {
 ###########################################
 
 resource "azurerm_lb_backend_address_pool" "web" {
-  resource_group_name = "${azurerm_resource_group.infra.name}"
+  resource_group_name = "${azurerm_resource_group.infrastructure.name}"
   loadbalancer_id     = "${azurerm_lb.primary.id}"
   name                = "web"
 }
@@ -80,14 +73,14 @@ resource "azurerm_lb_backend_address_pool" "web" {
 ############################
 
 resource "azurerm_lb_probe" "http" {
-  resource_group_name = "${azurerm_resource_group.infra.name}"
+  resource_group_name = "${azurerm_resource_group.infrastructure.name}"
   loadbalancer_id     = "${azurerm_lb.primary.id}"
   name                = "http"
   port                = 80
 }
 
 resource "azurerm_lb_probe" "https" {
-  resource_group_name = "${azurerm_resource_group.infra.name}"
+  resource_group_name = "${azurerm_resource_group.infrastructure.name}"
   loadbalancer_id     = "${azurerm_lb.primary.id}"
   name                = "https"
   port                = 443
@@ -98,7 +91,7 @@ resource "azurerm_lb_probe" "https" {
 ###########################
 
 resource "azurerm_lb_rule" "http" {
-  resource_group_name            = "${azurerm_resource_group.infra.name}"
+  resource_group_name            = "${azurerm_resource_group.infrastructure.name}"
   loadbalancer_id                = "${azurerm_lb.primary.id}"
   name                           = "http"
   protocol                       = "Tcp"
@@ -110,7 +103,7 @@ resource "azurerm_lb_rule" "http" {
 }
 
 resource "azurerm_lb_rule" "https" {
-  resource_group_name            = "${azurerm_resource_group.infra.name}"
+  resource_group_name            = "${azurerm_resource_group.infrastructure.name}"
   loadbalancer_id                = "${azurerm_lb.primary.id}"
   name                           = "https"
   protocol                       = "Tcp"
@@ -126,7 +119,7 @@ resource "azurerm_lb_rule" "https" {
 ###############################
 
 resource "azurerm_lb_nat_rule" "ssh" {
-  resource_group_name            = "${azurerm_resource_group.infra.name}"
+  resource_group_name            = "${azurerm_resource_group.infrastructure.name}"
   loadbalancer_id                = "${azurerm_lb.primary.id}"
   name                           = "ssh"
   protocol                       = "Tcp"
@@ -141,7 +134,7 @@ resource "azurerm_lb_nat_rule" "ssh" {
 
 resource "azurerm_virtual_network" "primary" {
   name                = "${var.env_short_name}-net"
-  resource_group_name = "${azurerm_resource_group.infra.name}"
+  resource_group_name = "${azurerm_resource_group.infrastructure.name}"
   address_space       = ["172.16.0.0/16"]
   location            = "${var.location_name}"
   dns_servers         = ["8.8.8.8"]
@@ -156,7 +149,7 @@ resource "azurerm_virtual_network" "primary" {
 
 resource "azurerm_subnet" "web" {
   name                      = "web"
-  resource_group_name       = "${azurerm_resource_group.infra.name}"
+  resource_group_name       = "${azurerm_resource_group.infrastructure.name}"
   virtual_network_name      = "${azurerm_virtual_network.primary.name}"
   network_security_group_id = "${azurerm_network_security_group.web.id}"
   address_prefix            = "172.16.1.0/24"
@@ -169,7 +162,7 @@ resource "azurerm_subnet" "web" {
 resource "azurerm_network_security_group" "web" {
   name                = "${var.env_short_name}-web-nsg"
   location            = "${var.location_name}"
-  resource_group_name = "${azurerm_resource_group.infra.name}"
+  resource_group_name = "${azurerm_resource_group.infrastructure.name}"
   security_rule {
     name                       = "AllowAll"
     priority                   = 100
@@ -250,13 +243,6 @@ resource "azurerm_virtual_machine" "web" {
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
   }
-  storage_data_disk {
-    name              = "${var.env_short_name}-web${format("%02d", count.index + 1)}-data-disk"
-    managed_disk_type = "Standard_LRS"
-    create_option     = "Empty"
-    lun               = 0
-    disk_size_gb      = "32"
-  }
   os_profile {
     computer_name  = "web${format("%02d", count.index + 1)}"
     admin_username = "fraser"
@@ -264,10 +250,10 @@ resource "azurerm_virtual_machine" "web" {
   os_profile_linux_config {
     disable_password_authentication = true
     ssh_keys                        = [
-        {
-            path     = "/home/fraser/.ssh/authorized_keys"
-            key_data = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2vlMUFRhbged6eP4jUQQgJyDUB2SFFojOov2nR4957SNXpcRKhT6HHSPVLI9FfBB4YRjMC3qseQOtS2QncnL+ZbZuSxybkqy5XGCO7zQs9TGEUwf8YPWXR9JTKxFOtL4+s4ucr4YKZkNkysjMl1R2NjcE3fKbHym6bGA0KTNguTBtGe5hipn4utmpQTS4tvJkm2Ny+XeEGTYd2v1d40A9QU614vTzKtOG56acrwG7B2jdGLlSbFamhW9kS6QEGDWhkc6wqkSM8Uly4TLLSYlHJLe5KnZpXnY9+LxXaEW0KpRXuewjpz1Sq46tgwqoDq18q17l6xuG9+ggNGpK0LrZ"
-        }
+      {
+          path     = "/home/fraser/.ssh/authorized_keys"
+          key_data = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2vlMUFRhbged6eP4jUQQgJyDUB2SFFojOov2nR4957SNXpcRKhT6HHSPVLI9FfBB4YRjMC3qseQOtS2QncnL+ZbZuSxybkqy5XGCO7zQs9TGEUwf8YPWXR9JTKxFOtL4+s4ucr4YKZkNkysjMl1R2NjcE3fKbHym6bGA0KTNguTBtGe5hipn4utmpQTS4tvJkm2Ny+XeEGTYd2v1d40A9QU614vTzKtOG56acrwG7B2jdGLlSbFamhW9kS6QEGDWhkc6wqkSM8Uly4TLLSYlHJLe5KnZpXnY9+LxXaEW0KpRXuewjpz1Sq46tgwqoDq18q17l6xuG9+ggNGpK0LrZ"
+      }
     ]
   }
   tags {
