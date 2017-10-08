@@ -1,0 +1,25 @@
+- name: Install Nginx
+  notify: Restart Nginx
+  apt:
+    state: present
+    name: nginx
+
+- name: Copy Nginx config files
+  notify: Restart Nginx
+  copy:
+    src: '{{ role_path }}/files/etc/nginx/nginx.conf'
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+    force: yes
+
+- name: Copy Nginx service file
+  notify: Restart Nginx
+  template:
+    src: '{{ role_path }}/files/lib/systemd/system/nginx.service'
+    dest: /lib/systemd/system/nginx.service
+    owner: root
+    group: root
+    mode: 0644
+    force: yes

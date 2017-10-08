@@ -1,0 +1,16 @@
+- name: Add Microsoft signature
+  apt_key:
+    state: present
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    keyring: /etc/apt/trusted.gpg
+
+- name: Add Microsoft repository
+  apt_repository:
+    state: present
+    repo: deb https://packages.microsoft.com/repos/microsoft-ubuntu-xenial-prod xenial main
+    filename: dotnetdev
+
+- name: Install .NET Core runtime
+  apt:
+    state: present
+    name: dotnet-runtime-2.0.0
