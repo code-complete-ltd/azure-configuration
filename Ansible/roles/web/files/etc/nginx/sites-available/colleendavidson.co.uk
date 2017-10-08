@@ -1,0 +1,20 @@
+server {
+    listen 80;
+    server_name colleendavidson.co.uk;
+    location ~* ^/(css|images|js)(.*)$ {
+        proxy_cache dotnet;
+        proxy_cache_valid 200 302 60m;
+        proxy_cache_valid 404 1m;
+        add_header X-Cache-Status $upstream_cache_status;
+        proxy_pass http://localhost:5002/$1$2;
+    }
+    location / {
+        proxy_pass http://localhost:5002/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}

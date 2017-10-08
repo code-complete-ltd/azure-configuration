@@ -1,0 +1,14 @@
+[Unit]
+Description=Kestrel service for colleendavidson.co.uk
+
+[Service]
+WorkingDirectory={{ web_root }}/colleendavidson.co.uk
+ExecStart=/usr/bin/dotnet {{ web_root }}/colleendavidson.co.uk/Web.dll --server.urls http://localhost:5002
+Restart=always
+RestartSec=10
+SyslogIdentifier=colleendavidson.co.uk
+User=www-data
+Environment=ASPNETCORE_ENVIRONMENT=Production
+
+[Install]
+WantedBy=multi-user.target

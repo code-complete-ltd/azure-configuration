@@ -1,8 +1,17 @@
-- name: Restart Nginx
+- name: Restart code-complete.co.uk service
   notify:
-    #- Confirm listening port open
-    #- Confirm cluster health green
+  service:
+    state: restarted
+    name: code-complete.co.uk
+
+- name: Restart colleendavidson.co.uk service
+  notify:
+  service:
+    state: restarted
+    name: colleendavidson.co.uk
+
+- name: Restart Nginx service
+  notify:
   service:
     state: restarted
     name: nginx
-    enabled: yes

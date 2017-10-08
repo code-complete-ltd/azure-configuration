@@ -1,3 +1,10 @@
-- include: dotnet.yml
+- import_tasks: dotnet.yml
 
-- include: nginx.yml
+- import_tasks: sites.yml
+
+- import_tasks: nginx.yml
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- import_tasks: run.yml

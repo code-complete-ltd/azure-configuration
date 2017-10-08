@@ -1,23 +1,42 @@
 - name: Install Nginx
-  notify: Restart Nginx
+  notify: Restart Nginx service
   apt:
     state: present
     name: nginx
 
-- name: Copy Nginx config files
-  notify: Restart Nginx
+- name: Copy multiple Nginx files
+  notify: Restart Nginx service
   copy:
-    src: '{{ role_path }}/files/etc/nginx/nginx.conf'
-    dest: /etc/nginx/nginx.conf
+    src: "{{ role_path }}/files/etc/nginx/{{ item }}"
+    dest: "/etc/nginx/{{ item }}"
     owner: root
     group: root
     mode: 0644
     force: yes
+  with_items:
+    - nginx.conf
+    #- /sites-available/code-complete.co.uk
+    - sites-available/colleendavidson.co.uk
+    - sites-available/default
+
+- name: Create multiple site links
+  notify: Restart Nginx service
+  file:
+    state: link
+    src: "/etc/nginx/sites-available/{{ item }}"
+    dest: "/etc/nginx/sites-enabled/{{ item }}"
+    owner: root
+    group: root
+    force: yes
+  with_items:
+    #- code-complete.co.uk
+    - colleendavidson.co.uk
+    - default
 
 - name: Copy Nginx service file
-  notify: Restart Nginx
+  notify: Restart Nginx service
   template:
-    src: '{{ role_path }}/files/lib/systemd/system/nginx.service'
+    src: "{{ role_path }}/files/lib/systemd/system/nginx.service"
     dest: /lib/systemd/system/nginx.service
     owner: root
     group: root
