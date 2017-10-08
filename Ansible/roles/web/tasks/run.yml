@@ -1,0 +1,14 @@
+# - name: Run code-complete.co.uk service
+#   service:
+#     state: started
+#     name: code-complete.co.uk
+
+- name: Run colleendavidson.co.uk service
+  service:
+    state: started
+    name: colleendavidson.co.uk
+
+- name: Run Nginx service
+  service:
+    state: started
+    name: nginx

@@ -10,7 +10,7 @@
     repo: deb https://packages.microsoft.com/repos/microsoft-ubuntu-xenial-prod xenial main
     filename: dotnetdev
 
-- name: Install .NET Core runtime
+- name: Install .NET Core 2.0 SDK
   apt:
     state: present
-    name: dotnet-runtime-2.0.0
+    name: dotnet-sdk-2.0.0

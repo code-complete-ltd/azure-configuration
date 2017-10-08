@@ -1,0 +1,52 @@
+# - name: Pull code-complete.co.uk repo
+#   git:
+#     repo: git@github.com:code-complete-ltd/code-complete.co.uk.git
+#     dest: "{{ code_root }}/code-complete.co.uk"
+#     accept_hostkey: yes
+#     version: master
+#   register: code_complete_co_uk_repo
+
+# - name: Stop code-complete.co.uk service
+#   service:
+#     state: stopped
+#     name: code-complete.co.uk
+#   ignore_errors: yes
+#   when: code_complete_co_uk_repo.before != code_complete_co_uk_repo.after
+
+# - name: Publish code-complete.co.uk
+#   notify: Restart code-complete.co.uk service
+#   command:
+#     "dotnet publish {{ code_root }}/code-complete.co.uk/Web/Web.csproj -o {{ web_root }}/code-complete.co.uk -c Release"
+#   when: code_complete_co_uk_repo.before != code_complete_co_uk_repo.after
+#   args:
+#     chdir: "{{ code_root }}/code-complete.co.uk/Web"
+
+- name: Pull colleendavidson.co.uk repo
+  git:
+    repo: git@github.com:code-complete-ltd/colleendavidson.co.uk.git
+    dest: "{{ code_root }}/colleendavidson.co.uk"
+    accept_hostkey: yes
+    version: master
+  register: colleendavidson_co_uk_repo
+
+- name: Stop colleendavidson.co.uk service
+  service:
+    state: stopped
+    name: colleendavidson.co.uk
+  ignore_errors: yes
+  when: colleendavidson_co_uk_repo.before != colleendavidson_co_uk_repo.after
+
+- name: Publish colleendavidson.co.uk web
+  command: "dotnet publish {{ code_root }}/colleendavidson.co.uk/Web/Web.csproj -o {{ web_root }}/colleendavidson.co.uk -c Release"
+  when: colleendavidson_co_uk_repo.before != colleendavidson_co_uk_repo.after
+
+- name: Copy multiple templates
+  template:
+    src: "{{ role_path }}/templates/etc/systemd/system/{{ item }}"
+    dest: /etc/systemd/system/{{ item }}
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    #- code-complete.co.uk.service
+    - colleendavidson.co.uk.service

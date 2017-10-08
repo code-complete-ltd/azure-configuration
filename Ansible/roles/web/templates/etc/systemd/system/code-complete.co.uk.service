@@ -1,0 +1,14 @@
+[Unit]
+Description=Kestrel service for code-complete.co.uk
+
+[Service]
+WorkingDirectory={{ web_root }}/code-complete.co.uk
+ExecStart=/usr/bin/dotnet {{ web_root }}/code-complete.co.uk/Web.dll --server.urls http://localhost:5001
+Restart=always
+RestartSec=10
+SyslogIdentifier=code-complete.co.uk
+User=www-data
+Environment=ASPNETCORE_ENVIRONMENT=Production
+
+[Install]
+WantedBy=multi-user.target
