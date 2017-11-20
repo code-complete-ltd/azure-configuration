@@ -1,4 +1,4 @@
-- name: Add Microsoft signature
+- name: Add Microsoft repository key
   apt_key:
     state: present
     url: https://packages.microsoft.com/keys/microsoft.asc
