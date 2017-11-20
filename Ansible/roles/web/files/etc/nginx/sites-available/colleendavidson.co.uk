@@ -1,5 +1,6 @@
 server {
     listen 80;
+    listen [::]:80;
     server_name colleendavidson.co.uk;
     location ~* ^/(css|images|js)(.*)$ {
         proxy_cache dotnet;
@@ -21,6 +22,7 @@ server {
 
 server {
     listen 80;
+    listen [::]:80;
     server_name www.colleendavidson.co.uk;
     rewrite ^/(.*)$ http://colleendavidson.co.uk/$1 permanent;
 }
