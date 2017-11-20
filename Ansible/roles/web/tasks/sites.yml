@@ -21,6 +21,14 @@
 #   args:
 #     chdir: "{{ code_root }}/code-complete.co.uk/Web"
 
+# - name: Copy code-complete.co.uk template
+#   template:
+#     src: "{{ role_path }}/templates/etc/systemd/system/code-complete.co.uk.service"
+#     dest: /etc/systemd/system/code-complete.co.uk.service
+#     owner: root
+#     group: root
+#     mode: 0644
+
 - name: Pull colleendavidson.co.uk repo
   git:
     repo: git@github.com:code-complete-ltd/colleendavidson.co.uk.git
@@ -40,13 +48,17 @@
   command: "dotnet publish {{ code_root }}/colleendavidson.co.uk/Web/Web.csproj -o {{ web_root }}/colleendavidson.co.uk -c Release"
   when: colleendavidson_co_uk_repo.before != colleendavidson_co_uk_repo.after
 
-- name: Copy multiple templates
+- name: Copy colleendavidson.co.uk template
   template:
-    src: "{{ role_path }}/templates/etc/systemd/system/{{ item }}"
-    dest: /etc/systemd/system/{{ item }}
+    src: "{{ role_path }}/templates/etc/systemd/system/colleendavidson.co.uk.service"
+    dest: /etc/systemd/system/colleendavidson.co.uk.service
     owner: root
     group: root
     mode: 0644
-  with_items:
-    #- code-complete.co.uk.service
-    - colleendavidson.co.uk.service
+
+- name: Pull middletonscamping.com repo
+  git:
+    repo: git@github.com:code-complete-ltd/middletonscamping.com.git
+    dest: "{{ web_root }}/middletonscamping.com"
+    accept_hostkey: yes
+    version: master

@@ -4,20 +4,36 @@
     state: present
     name: nginx
 
-- name: Copy multiple Nginx files
+- name: Copy Nginx config file
   notify: Restart Nginx service
   copy:
-    src: "{{ role_path }}/files/etc/nginx/{{ item }}"
-    dest: "/etc/nginx/{{ item }}"
+    src: "{{ role_path }}/files/etc/nginx/nginx.conf"
+    dest: /etc/nginx/nginx.conf
     owner: root
     group: root
     mode: 0644
-    force: yes
+
+- name: Copy multiple site files
+  notify: Restart Nginx service
+  copy:
+    src: "{{ role_path }}/files/etc/nginx/sites-available/{{ item }}"
+    dest: "/etc/nginx/sites-available/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
   with_items:
-    - nginx.conf
-    #- /sites-available/code-complete.co.uk
-    - sites-available/colleendavidson.co.uk
-    - sites-available/default
+    #- code-complete.co.uk
+    - colleendavidson.co.uk
+    - default
+
+- name: Copy middletonscamping.com site template
+  notify: Restart Nginx service
+  template: 
+    src: "{{ role_path }}/templates/etc/nginx/sites-available/middletonscamping.com"
+    dest: /etc/nginx/sites-available/middletonscamping.com
+    owner: root
+    group: root
+    mode: 0644
 
 - name: Create multiple site links
   notify: Restart Nginx service
@@ -27,10 +43,10 @@
     dest: "/etc/nginx/sites-enabled/{{ item }}"
     owner: root
     group: root
-    force: yes
   with_items:
     #- code-complete.co.uk
     - colleendavidson.co.uk
+    - middletonscamping.com
     - default
 
 - name: Copy Nginx service file
@@ -41,4 +57,3 @@
     owner: root
     group: root
     mode: 0644
-    force: yes
